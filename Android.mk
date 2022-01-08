@@ -16,6 +16,7 @@ LOCAL_MODULE := libqti-tinycompress
 LOCAL_SHARED_LIBRARIES := libcutils libutils
 LOCAL_MODULE_TAGS := optional
 LOCAL_VENDOR_MODULE := true
+LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/include
 include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
