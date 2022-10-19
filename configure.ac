@@ -39,5 +39,12 @@ if (test "x${with_glib}" = "xyes"); then
         AC_SUBST(GLIB_CFLAGS)
         AC_SUBST(GLIB_LIBS)
 fi
+
+AC_ARG_WITH([openwrt],
+    AS_HELP_STRING([use openwrt (default is no)]),
+    [with_openwrt=$withval],
+    [with_openwrt=no])
+AM_CONDITIONAL([BUILDSYSTEM_OPENWRT], [test "x${with_openwrt}" = "xyes"])
+
 AC_CONFIG_FILES([ Makefile tinycompress.pc ])
 AC_OUTPUT
