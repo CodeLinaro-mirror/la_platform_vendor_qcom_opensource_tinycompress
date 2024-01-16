@@ -26,6 +26,10 @@
 ** WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 ** OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 ** IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+**
+** Changes from Qualcomm Innovation Center are provided under the following license:
+** Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
+** SPDX-License-Identifier: BSD-3-Clause-Clear
 **/
 
 #include <stdio.h>
@@ -33,6 +37,7 @@
 #include <stdint.h>
 #include <fcntl.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
@@ -43,6 +48,7 @@
 #include <linux/ioctl.h>
 #include <sound/asound.h>
 #include "tinycompress/compress_plugin.h"
+#include "tinycompress/tinycompress.h"
 #include "sound/compress_offload.h"
 #include "compress_ops.h"
 #include "snd_utils.h"
@@ -96,8 +102,12 @@ static int compress_plug_set_params(struct compress_plug_data *plug_data,
 		return -EINVAL;
 
 	rc = plugin->ops->set_params(plugin, params);
-	if (!rc)
+	if (!rc) {
 		plugin->state = COMPRESS_PLUG_STATE_SETUP;
+		if (plug_data->flags & COMPRESS_OUT) {
+			plugin->state = COMPRESS_PLUG_STATE_PREPARED;
+		}
+	}
 
 	return rc;
 }
