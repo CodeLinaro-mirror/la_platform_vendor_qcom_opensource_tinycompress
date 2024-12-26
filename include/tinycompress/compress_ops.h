@@ -23,8 +23,8 @@ struct compress_ops {
 			unsigned int *avail, struct timespec *tstamp);
 	int (*get_tstamp)(void *compress_data,
 			unsigned int *samples, unsigned int *sampling_rate);
-	int (*write)(void *compress_data, const void *buf, size_t size);
-	int (*read)(void *compress_data, void *buf, size_t size);
+	int (*write)(void *compress_data, const void *buf, unsigned int size);
+	int (*read)(void *compress_data, void *buf, unsigned int size);
 	int (*start)(void *compress_data);
 	int (*stop)(void *compress_data);
 	int (*pause)(void *compress_data);
