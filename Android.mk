@@ -5,6 +5,7 @@ LOCAL_C_INCLUDES:= $(LOCAL_PATH)/include
 LOCAL_SRC_FILES:= src/lib/compress.c src/lib/compress_hw.c
 LOCAL_MODULE := liboss_tinycompress
 LOCAL_SHARED_LIBRARIES:= libcutils libutils
+LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/include
 LOCAL_MODULE_TAGS := optional
 LOCAL_PRELINK_MODULE := false
 LOCAL_CFLAGS := -DTINYCOMPRESS_PLUGIN_DIR=\"\"
