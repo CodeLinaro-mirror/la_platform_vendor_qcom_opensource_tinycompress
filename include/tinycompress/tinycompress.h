@@ -1,7 +1,4 @@
 /*
- * This file is provided under a dual BSD/LGPLv2.1 license.  When using or
- * redistributing this file, you may do so under either license.
- *
  * BSD LICENSE
  *
  * Copyright (c) 2011-2012, Intel Corporation
@@ -56,9 +53,6 @@
 #ifndef __TINYCOMPRESS_H
 #define __TINYCOMPRESS_H
 
-#include <linux/types.h>
-#include <stdbool.h>
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -88,6 +82,10 @@ struct compr_gapless_mdata {
 struct compress;
 struct snd_compr_tstamp;
 
+#ifdef ENABLE_EXTENDED_COMPRESS_FORMAT
+union snd_codec_options;
+struct snd_compr_metadata;
+#endif
 /*
  * compress_open: open a new compress stream
  * returns the valid struct compress on success, NULL on failure
@@ -103,23 +101,6 @@ struct snd_compr_tstamp;
 struct compress *compress_open(unsigned int card, unsigned int device,
 		unsigned int flags, struct compr_config *config);
 
-/*
- * compress_open_by_name: open a new compress stream
- * returns the valid struct compress on success, NULL on failure
- * If config does not specify a requested fragment size, on return
- * it will be updated with the size and number of fragments that
- * were configured.
- * format of name is :
- *    hw:<card>,<device> for real hw compress node
- *    <plugin_libname>:<custom string> for virtual compress node
- *
- * @name: name of the compress node
- * @flags: device flags can be COMPRESS_OUT or COMPRESS_IN
- * @config: stream config requested. Returns actual fragment config
- */
-
-struct compress *compress_open_by_name(const char *name,
-		unsigned int flags, struct compr_config *config);
 /*
  * compress_close: close the compress stream
  *
@@ -148,7 +129,7 @@ int compress_get_hpointer(struct compress *compress,
  * @sampling_rate: sampling rate of decoded samples
  */
 int compress_get_tstamp(struct compress *compress,
-		unsigned int *samples, unsigned int *sampling_rate);
+		unsigned long *samples, unsigned int *sampling_rate);
 
 /*
  * compress_write: write data to the compress stream
@@ -258,6 +239,20 @@ int compress_partial_drain(struct compress *compress);
 int compress_set_gapless_metadata(struct compress *compress,
 			struct compr_gapless_mdata *mdata);
 
+#ifdef ENABLE_EXTENDED_COMPRESS_FORMAT
+/*
+ * compress_set_next_track_param: set params of next compress stream in gapless
+ *
+ * return 0 on success, negative on error
+ *
+ * @compress: compress stream for which codec options has to be set
+ * @codec_options: codec options of compress stream based on codec type
+ */
+
+int compress_set_next_track_param(struct compress *compress,
+			union snd_codec_options *codec_options);
+#endif
+
 /*
  * is_codec_supported:check if the given codec is supported
  * returns true when supported, false if not
@@ -268,20 +263,6 @@ int compress_set_gapless_metadata(struct compress *compress,
  * @codec: codec type and parameters to be checked
  */
 bool is_codec_supported(unsigned int card, unsigned int device,
-	       unsigned int flags, struct snd_codec *codec);
-
-/*
- * is_codec_supported_by_name:check if the given codec is supported
- * returns true when supported, false if not.
- * format of name is :
- *    hw:<card>,<device> for real hw compress node
- *    <plugin_libname>:<custom string> for virtual compress node
- *
- * @name: name of the compress node
- * @flags: stream flags
- * @codec: codec type and parameters to be checked
- */
-bool is_codec_supported_by_name(const char *name,
 	       unsigned int flags, struct snd_codec *codec);
 
 /*
@@ -306,20 +287,51 @@ int is_compress_ready(struct compress *compress);
 
 /* Returns a human readable reason for the last error */
 const char *compress_get_error(struct compress *compress);
-
 /*
- * compress_set_param: set codec config intended for next track
- * if DSP has support to switch CODEC config during gapless playback
- *
- * return 0 on success, negative on error
- *
- * @compress: compress stream for which metadata has to set
- * @config: stream config for next track
+ * since the SNDRV_PCM_RATE_* is not availble anywhere in userspace
+ * and we have used these to define the sampling rate, we need to define
+ * then here
  */
+#define SNDRV_PCM_RATE_5512		(1<<0)		/* 5512Hz */
+#define SNDRV_PCM_RATE_8000		(1<<1)		/* 8000Hz */
+#define SNDRV_PCM_RATE_11025		(1<<2)		/* 11025Hz */
+#define SNDRV_PCM_RATE_16000		(1<<3)		/* 16000Hz */
+#define SNDRV_PCM_RATE_22050		(1<<4)		/* 22050Hz */
+#define SNDRV_PCM_RATE_32000		(1<<5)		/* 32000Hz */
+#define SNDRV_PCM_RATE_44100		(1<<6)		/* 44100Hz */
+#define SNDRV_PCM_RATE_48000		(1<<7)		/* 48000Hz */
+#define SNDRV_PCM_RATE_64000		(1<<8)		/* 64000Hz */
+#define SNDRV_PCM_RATE_88200		(1<<9)		/* 88200Hz */
+#define SNDRV_PCM_RATE_96000		(1<<10)		/* 96000Hz */
+#define SNDRV_PCM_RATE_176400		(1<<11)		/* 176400Hz */
+#define SNDRV_PCM_RATE_192000		(1<<12)		/* 192000Hz */
+
+/* utility functions */
+unsigned int compress_get_alsa_rate(unsigned int rate);
+
+ /*
+  * compress_set_codec_params: set codec config intended for next track
+  * if DSP has support to switch CODEC config during gapless playback
+  * This API is expected to be called after compress_next_track is called
+  * return 0 on success, negative on error
+  *
+  * @compress: compress stream for which metadata has to set
+  * @codec: codec configuration for next track
+  */
 int compress_set_codec_params(struct compress *compress, struct snd_codec *codec);
 
+#ifdef ENABLE_EXTENDED_COMPRESS_FORMAT
+/* set metadata */
+int compress_set_metadata(struct compress *compress,
+	    struct snd_compr_metadata *mdata);
+
+/* get metadata */
+int compress_get_metadata(struct compress *compress,
+	    struct snd_compr_metadata *mdata);
+#endif
+
 #if defined(__cplusplus)
-} // extern "C"
+}
 #endif
 
 #endif

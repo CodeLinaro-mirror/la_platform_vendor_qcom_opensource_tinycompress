@@ -1,7 +1,4 @@
 /*
- * This file is provided under a dual BSD/LGPLv2.1 license.  When using or
- * redistributing this file, you may do so under either license.
- *
  * BSD LICENSE
  *
  * mp3 header and prasing
@@ -66,13 +63,13 @@ extern "C" {
 
 #define MP3_SYNC 0xe0ff
 
-static const int mp3_sample_rates[3][3] = {
+const int mp3_sample_rates[3][3] = {
 	{44100, 48000, 32000},        /* MPEG-1 */
 	{22050, 24000, 16000},        /* MPEG-2 */
 	{11025, 12000,  8000},        /* MPEG-2.5 */
 };
 
-static const int mp3_bit_rates[3][3][15] = {
+const int mp3_bit_rates[3][3][15] = {
 	{
 		/* MPEG-1 */
 		{  0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448}, /* Layer 1 */
@@ -105,5 +102,9 @@ enum mp3_stereo_mode {
 	DUAL = 0x02,
 	MONO = 0x03
 };
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif

@@ -1,74 +1,50 @@
 #                                               -*- Autoconf -*-
-# Process this file with autoconf to produce a configure script.
+# configure.ac -- Autoconf script for libacdbloader
+#
 
-AC_PREREQ([2.63])
-AC_INIT([tinycompress], [1.2.11])
-AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_MACRO_DIR([m4])
+# Process this file with autoconf to produce a configure script
 
-AM_INIT_AUTOMAKE(1.10)
-LT_INIT(disable-static)
-
-AC_ARG_ENABLE(fcplay,
-  AS_HELP_STRING([--enable-fcplay], [enable the fcplay component]),
-  [build_fcplay="$enableval"], [build_fcplay="no"])
-AC_ARG_ENABLE(pcm,
-  AS_HELP_STRING([--enable-pcm], [enable PCM compress playback support(used for debugging)]),
-  [enable_pcm="$enableval"], [enable_pcm="no"])
-
-AM_CONDITIONAL([BUILD_FCPLAY], [test x$build_fcplay = xyes])
-AM_CONDITIONAL([ENABLE_PCM], [test x$enable_pcm = xyes])
-
-#if test "$build_fcplay" = "yes"; then
-#  AC_DEFINE([BUILD_FCPLAY], "1", [Build Fcplay component])
-#fi
-
-if test "$enable_pcm" = "yes"; then
-  AC_DEFINE([ENABLE_PCM], 1, [Enable PCM compress playback support (used for debugging)])
-fi
+# Requires autoconf tool later than 2.61
+AC_PREREQ(2.69)
+# Initialize the smwrapper package version 1.0.0
+AC_INIT([tinycomress],1.0.0)
+# Does not strictly follow GNU Coding standards
+AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 # Checks for programs.
-AC_PROG_CXX
 AC_PROG_CC
+AM_PROG_CC_C_O
+AC_PROG_CXX
+AC_PROG_LIBTOOL
+AC_PROG_AWK
 AC_PROG_CPP
 AC_PROG_INSTALL
+AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AM_PROG_CC_C_O
-PKG_INSTALLDIR
+PKG_PROG_PKG_CONFIG
+
 
 AC_ARG_WITH([glib],
-     AC_HELP_STRING([--with-glib],
-        [enable glib, building HLOS systems which use glib]))
+      AC_HELP_STRING([--with-glib],
+         [enable glib, Build against glib. Use this when building for HLOS systems which use glib]))
 
 if (test "x${with_glib}" = "xyes"); then
-       PKG_CHECK_MODULES(GTHREAD, gthread-2.0 >= 2.16, dummy=yes,
-                               AC_MSG_ERROR(GThread >= 2.16 is required))
-       PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.16, dummy=yes,
-                               AC_MSG_ERROR(GLib >= 2.16 is required))
-       GLIB_CFLAGS="$GLIB_CFLAGS $GTHREAD_CFLAGS"
-       GLIB_LIBS="$GLIB_LIBS $GTHREAD_LIBS"
+        PKG_CHECK_MODULES(GTHREAD, gthread-2.0 >= 2.16, dummy=yes,
+                                AC_MSG_ERROR(GThread >= 2.16 is required))
+        PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.16, dummy=yes,
+                                AC_MSG_ERROR(GLib >= 2.16 is required))
+        GLIB_CFLAGS="$GLIB_CFLAGS $GTHREAD_CFLAGS"
+        GLIB_LIBS="$GLIB_LIBS $GTHREAD_LIBS"
 
-       AC_SUBST(GLIB_CFLAGS)
-       AC_SUBST(GLIB_LIBS)
+        AC_SUBST(GLIB_CFLAGS)
+        AC_SUBST(GLIB_LIBS)
 fi
 
-# Checks for libraries.
-AS_IF([test "x$build_fcplay" = "xyes"], [
-  PKG_CHECK_MODULES([AVCODEC], [libavcodec >= 3.0.7])
-  PKG_CHECK_MODULES([AVFORMAT], [libavformat >= 3.0.7])
-  PKG_CHECK_MODULES([AVUTIL], [libavutil >= 3.0.7])
-])
+AC_ARG_WITH([openwrt],
+    AS_HELP_STRING([use openwrt (default is no)]),
+    [with_openwrt=$withval],
+    [with_openwrt=no])
+AM_CONDITIONAL([BUILDSYSTEM_OPENWRT], [test "x${with_openwrt}" = "xyes"])
 
-# Checks for typedefs, structures, and compiler characteristics.
-
-# Checks for library functions.
-
-AC_CONFIG_FILES([
-Makefile
-include/Makefile
-src/Makefile
-src/lib/Makefile
-src/utils/Makefile
-src/utils-lgpl/Makefile
-tinycompress.pc])
+AC_CONFIG_FILES([ Makefile tinycompress.pc ])
 AC_OUTPUT

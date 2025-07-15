@@ -1,33 +1,36 @@
-LOCAL_PATH:= $(call my-dir)
+ifneq ($(AUDIO_USE_STUB_HAL), true)
+LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
-LOCAL_C_INCLUDES:= $(LOCAL_PATH)/include
-LOCAL_SRC_FILES:= src/lib/compress.c src/lib/compress_hw.c
-LOCAL_MODULE := liboss_tinycompress
-LOCAL_SHARED_LIBRARIES:= libcutils libutils
+LOCAL_CFLAGS := -Wno-macro-redefined -Wno-unused-function
+ifeq ($(strip $(AUDIO_FEATURE_ENABLED_EXTENDED_COMPRESS_FORMAT)), true)
+LOCAL_CFLAGS += -DENABLE_EXTENDED_COMPRESS_FORMAT
+endif
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/
+LOCAL_C_INCLUDES += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
+LOCAL_C_INCLUDES += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/techpack/audio/include
+LOCAL_ADDITIONAL_DEPENDENCIES := $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
+LOCAL_SRC_FILES := compress.c utils.c compress_hw.c compress_plugin.c snd_utils.c
+LOCAL_MODULE := libqti-tinycompress
+LOCAL_SHARED_LIBRARIES := libcutils libutils
 LOCAL_MODULE_TAGS := optional
-LOCAL_PRELINK_MODULE := false
-LOCAL_CFLAGS := -DTINYCOMPRESS_PLUGIN_DIR=\"\"
 LOCAL_VENDOR_MODULE := true
+LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/include
 include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
-
-LOCAL_C_INCLUDES:= $(LOCAL_PATH)/include
-LOCAL_SRC_FILES:= src/utils/cplay.c
-LOCAL_MODULE := oss_cplay
-LOCAL_SHARED_LIBRARIES:= libcutils libutils liboss_tinycompress
-LOCAL_MODULE_TAGS := optional
+LOCAL_CFLAGS := -Wno-macro-redefined -Wno-unused-function
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/
+LOCAL_C_INCLUDES += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
+LOCAL_C_INCLUDES += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/techpack/audio/include
+LOCAL_ADDITIONAL_DEPENDENCIES += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
+LOCAL_SRC_FILES := cplay.c
+LOCAL_MODULE := qticplay
 LOCAL_VENDOR_MODULE := true
+LOCAL_SHARED_LIBRARIES := libcutils libutils libqti-tinycompress
+LOCAL_MODULE_TAGS := optional
 include $(BUILD_EXECUTABLE)
 
-include $(CLEAR_VARS)
-
-LOCAL_C_INCLUDES:= $(LOCAL_PATH)/include
-LOCAL_SRC_FILES:= src/utils/crecord.c src/utils/wave.c
-LOCAL_MODULE := oss_crec
-LOCAL_SHARED_LIBRARIES:= libcutils libutils liboss_tinycompress
-LOCAL_MODULE_TAGS := optional
-LOCAL_VENDOR_MODULE := true
-include $(BUILD_EXECUTABLE)
-
+endif
