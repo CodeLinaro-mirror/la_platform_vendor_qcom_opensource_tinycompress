@@ -1,3 +1,4 @@
+ifneq ($(TARGET_SDV_ENABLED), true)
 ifneq ($(AUDIO_USE_STUB_HAL), true)
 LOCAL_PATH := $(call my-dir)
 
@@ -32,4 +33,5 @@ LOCAL_SHARED_LIBRARIES := libcutils libutils libqti-tinycompress
 LOCAL_MODULE_TAGS := optional
 include $(BUILD_EXECUTABLE)
 
+endif
 endif

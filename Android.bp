@@ -1,0 +1,63 @@
+cc_library_shared {
+    name: "libqti-tinycompress",
+    vendor: true,
+    srcs: [
+            "compress.c",
+            "utils.c",
+            "compress_hw.c",
+            "compress_plugin.c",
+            "snd_utils.c",
+            ],
+    shared_libs: [
+        "libcutils",
+        "libutils",
+        ],
+    include_dirs: [
+        "vendor/qcom/opensource/tinycompress/include",
+        ],
+    cflags: [
+            "-Wno-macro-redefined",
+            "-Wno-unused-function",
+        ]
+        + select(soong_config_variable("qti", "AUDIO_FEATURE_ENABLED_EXTENDED_COMPRESS_FORMAT"),
+        {
+            true: ["-DENABLE_EXTENDED_COMPRESS_FORMAT"],
+            default: [],
+        }),
+    apex_available: [
+        "//apex_available:platform",
+        "//apex_available:anyapex",
+    ],
+    enabled: select(soong_config_variable("qti", "AUDIO_SDV_APEX_ENABLED"), {
+        "true": true,
+        default: false,
+    }),
+}
+
+cc_binary {
+    name: "qticplay",
+    vendor: true,
+    srcs: [
+            "cplay.c",
+            ],
+    shared_libs: [
+        "libcutils",
+        "libutils",
+        "libqti-tinycompress",
+        ],
+    include_dirs: [
+        "vendor/qcom/opensource/tinycompress/include",
+        ],
+    cflags: [
+        "-Wno-macro-redefined",
+        "-Wno-unused-function"
+        ],
+    apex_available: [
+        "//apex_available:platform",
+        "//apex_available:anyapex",
+    ],
+    enabled: select(soong_config_variable("qti", "AUDIO_SDV_APEX_ENABLED"), {
+        "true": true,
+        default: false,
+    }),
+}
